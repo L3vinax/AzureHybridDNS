@@ -3,7 +3,7 @@ resources
 | extend vnetId = tolower(tostring(properties.virtualNetwork.id))
 | extend vnetName = tostring(split(vnetId, "/")[8])
 | extend dnsZoneName = tostring(split(id, "/")[8])
-| where dnsZoneName contains "privatelink"
+| where dnsZoneName startswith "privatelink"
 | project dnsZoneName, linkName = name, vnetId, vnetName
 | join kind=leftouter (
     resources
