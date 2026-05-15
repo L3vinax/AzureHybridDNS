@@ -1,0 +1,15 @@
+resources
+| where type == "microsoft.network/privatednszones/virtualnetworklinks"
+| extend vnetId = tolower(tostring(properties.virtualNetwork.id))
+| extend vnetName = tostring(split(vnetId, "/")[8])
+| extend dnsZoneName = tostring(split(id, "/")[8])
+| project dnsZoneName, linkName = name, vnetId, vnetName
+| join kind=leftouter (
+    resources
+    | where type == "microsoft.network/dnsresolvers"
+    | extend vnetId = tolower(tostring(properties.virtualNetwork.id))
+    | project vnetId, resolverName = name
+) on vnetId
+| extend hasResolver = iif(isnotempty(resolverName), "Yes", "No")
+| project dnsZoneName, vnetName, linkName, hasResolver, resolverName
+| order by dnsZoneName asc, vnetName asc
