@@ -1,0 +1,58 @@
+
+{
+  "properties": {
+    "displayName": "Allow Private Link DNS zones only in a central subscription and resource group",
+    "policyType": "Custom",
+    "mode": "All",
+    "description": "Restricts creation of Private Link private DNS zones (privatelink.*) so they can only be created in a designated subscription and resource group.",
+    "metadata": {
+      "category": "Networking",
+      "version": "1.0.0"
+    },
+    "parameters": {
+      "allowedSubscriptionId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Allowed Subscription ID",
+          "description": "Subscription where Private Link DNS zones are allowed"
+        }
+      },
+      "allowedResourceGroupName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Allowed Resource Group Name",
+          "description": "Resource group where Private Link DNS zones are allowed"
+        }
+      }
+    },
+    "policyRule": {
+ 
+  "if": {
+    "allOf": [
+      {
+        "field": "type",
+        "equals": "Microsoft.Network/privateDnsZones"
+      },
+      {
+        "field": "name",
+        "contains": "privatelink."
+      },
+      {
+        "anyOf": [
+          {
+            "field": "subscriptionId",
+            "notEquals": "[parameters('allowedSubscriptionId')]"
+          },
+          {
+            "field": "resourceGroup",
+            "notEquals": "[parameters('allowedResourceGroupName')]"
+          }
+        ]
+      }
+    ]
+  },
+  "then": {
+    "effect": "Deny"
+  }
+}
+
